@@ -13,7 +13,7 @@ private:
 
 class mat3 {	//mat3 클래스 생성
 public:
-	float Tr[3][3] = {	// 3*3 Translate 정의, 3,5만큼 이동한 거리 삽입
+	float Tr[3][3] = {	// 3*3 Translate 정의, 3,5만큼 이동한 거리 삽입 
 		{1,0,3},
 		{0,1,5},
 		{0,0,1}
