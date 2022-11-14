@@ -82,3 +82,36 @@ void header()
 		}
 	}
 }
+
+struct matA
+{
+	void Identity(int argc, char *argv[]) {
+		int i, j;
+		int n = 3;
+		int m[3][3];
+		for (i = 0; i < n; i++) {
+			for (j = 0; j < n; j++) {
+				if (i == j) m[i][j] = 1;
+				else m[i][j] = 0;
+			}
+		}
+		for (i = 0; i < n; i++) {
+			for (j = 0; j < n; j++) {
+				printf("%2d", m[i][j]);
+			}
+			printf("\n");
+		}
+	}
+	void transposeNbyN(int matrix[][4], int n) {
+		int i, j, tmp;
+
+		for (i = 0; i < n; i++) {
+			// 전치를 한줄씩row 할 때마다 전치해야 할 줄과 컬럼이 하나씩  줄어듦. 
+			for (j = 0 + i; j < n; j++) {
+				tmp = matrix[i][j];
+				matrix[i][j] = matrix[j][i]; // 행과 열 인덱스를 바꾸어 저장.  
+				matrix[j][i] = tmp;
+			}
+		}
+	}
+};
