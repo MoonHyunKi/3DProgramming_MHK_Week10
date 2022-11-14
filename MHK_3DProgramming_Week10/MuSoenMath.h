@@ -1,117 +1,277 @@
 #pragma once
 #include <iostream>
+#include <cmath>
+
+#define N 3  
+
+//----------------------------------------------------- 연산자 오버로딩
+using namespace std;
+class Mat3 {
+public:
+    float Mat[3][3]; // 2차원 배열의 행렬
+
+    Mat3() { //  행렬 생성자
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                Mat[i][j] = 0; //멤버 변수 초기화
+            }
+        }
+    }
+    void Reset() { // 행렬을 초기화 시키는 함수
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                Mat[i][j] = 0;
+            }
+        }
+        Mat[2][2] = 1; //2차원 좌표에서 z축은 바뀌지 않으므로 1로 초기화
+    }
+
+    void Translate(float x, float y)
+    {
+        Reset();
+        Mat[0][0] = 1;
+        Mat[1][1] = 1;
+        Mat[2][0] = x;
+        Mat[2][1] = y;
+        // 이동 변환 행렬 공식에 맞게 설정
+    }
+
+    void Rotate(float r)
+    {
+        Reset();
+        double Rotate = r * (3.14 / 180); // 라디안 설정
+        Mat[0][0] = cos(Rotate);
+        Mat[0][1] = (-sin(Rotate));
+        Mat[1][0] = sin(Rotate);
+        Mat[1][1] = cos(Rotate);
+        // 회전 변환 행렬 공식에 맞게 설정
+    }
+
+    void Scale(float s)
+    {
+        Reset();
+        Mat[0][0] = s;
+        Mat[1][1] = s;
+        // 크기 변환 행렬 공식에 맞게 설정
+    }
+
+};
+
+class Vec3 {
+public:
+    float Position[2]; // 2차원좌표+동차좌표
+
+    Vec3(float x, float y) { // 생성자
+        Position[0] = x;
+        Position[1] = y;
+    }
+
+    Vec3 operator *(Mat3& p) // 연산자 오버로딩
+    {
+        float x = Position[0]; // 3*1행렬의 x설정
+        float y = Position[1]; // 3*1행렬의 y설정
+        float z = 1; // 3*1행렬의 z설정
+        float a = (x * p.Mat[0][0]) + (y * p.Mat[1][0]) + (z * p.Mat[2][0]); // 행렬곱 x좌표 결과값 저장
+        float b = (x * p.Mat[0][1]) + (y * p.Mat[1][1]) + (z * p.Mat[2][1]); // 행렬곱 y좌표 결과값 저장
+        // Z좌표는 2차원에선 필요없으므로 생략
+        return Vec3(a, b); // 저장된 x,y좌표 리턴
+    }
+};
+
+
+//--------------------------------------------------------------------- 단위행렬
+
+
+#include<iostream>
+#include <cmath>
+
 using namespace std;
 
-class vec3 {	//vec3 클래스 생성
-public:
-	float v[3][1] = { {2},{2},{1} };	// Vector값 배열로 정렬
-	float v_col = sizeof(v[0]) / sizeof(float);  // 행 벡터값의 크기
-	float v_row = sizeof(v) / sizeof(v[0]);  // 열 벡터값의 크기
-	float p[3][3] = { 0 };				// 최종 결과값 저장용 선언
-private:
+
+void IdentityMatrix() {
+
+    cout << "단위행렬 \n";
+    float Mat[3][3];
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            Mat[i][j] = 0;  //행렬 초기화
+        }
+    }
+    Mat[0][0] = 1; //{1,0,0) {0,1,0} {0,0,1}이 되기 위해 배열에 1을 넣어준다.
+    Mat[1][1] = 1;
+    Mat[2][2] = 1;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            cout << Mat[i][j] << " ";
+        }
+        cout << "\n";
+    }
 };
 
-class mat3 {	//mat3 클래스 생성
-public:
-	float Tr[3][3] = {	// 3*3 Translate 정의, 3,5만큼 이동한 거리 삽입 
-		{1,0,3},
-		{0,1,5},
-		{0,0,1}
-	};
 
-	float Sc[3][3] = {	// 3*3 Scale 정의, 2배 키운 크기 삽입
-		{2,0,0},
-		{0,2,0},
-		{0,0,1}
-	};
 
-	float Pi = 3.14;	//원주율
-	float cos30 = 0.15;		// cos30의 값
-	float sin30 = 0.5;		// sin30의 값
 
-	float Rt[3][3] = {	// 3*3 Rotate 정의, 30도 돌린 값 삽입
-		{cos30, -sin30, 0},
-		{sin30, cos30, 0},
-		{0,0,1}
-	};
-private:
-};
+//------------------------------------------------------------- 전치행렬
 
-void header()
+#include<iostream>
+#include <cmath>
+#include "stdio.h"
+
+
+void transposematrix()
 {
-	float a[3][3] = { 0 };		// 추후 행렬곱 데이터를 삽입하기 위한 행렬
-	float b[3][3] = { 0 };		// 추후 행렬곱 데이터를 삽입하기 위한 행렬
+    int m = 3;
+    int n = 3;
+    int matrix[3][3] = { {1,2,3},{4,5,6},{7,8,9} };// 행렬에 임의의 값 넣어준다.
+    int transpose[3][3];
+    int i, j;
 
-	mat3 Translate, Rotate, Scale;	// mat3 안의 TSR을 가져오기 위한 변수
-	vec3 Vector, P;					// vec3 안의 Vector, P를 가져오기 위한 변수
 
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 3; k++) {
-				a[i][j] += Scale.Sc[i][k] * Translate.Tr[k][j]; 
-				// Scale 행렬 * Translate 행렬 = 행렬 a 삽입
-			}
-		}
-	}
+    //transpose 행렬의 전치행렬 구하기
+    for (i = 0; i < m; i++)
+        for (j = 0; j < n; j++)
+            transpose[i][j] = matrix[j][i]; //i와 j값을 바꿔 넣어준다.
 
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 3; k++) {
-				b[i][j] += Rotate.Rt[i][k] * a[k][j];
-				// Rotate 행렬 * 위의 행렬 a(SC * TR) = 행렬 b 삽입
-			}
-		}
-	}
 
-	for (int i = 0; i < Vector.v_row; i++) {
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < Vector.v_col; k++) {
-				P.p[i][j] += Vector.v[i][k] * b[k][j];
-				// Vector 행렬 * 위의 행렬 b(Tr * SC * Rt) = vec3 p 행렬 삽입
-			}
-		}
-	}
+    //transpose의 원래 행렬
+    printf("전치행렬 바꾸기 전 행렬\n");
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < m; j++)
+            printf("%d\t", matrix[i][j]);
+        printf("\n");
+    }
+    printf("\n");
 
-	printf("vec3 p의 값은 : ");
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			cout << P.p[i][j];
-			if (j < 2) {
-				cout << " ";
-			}
-		}
-	}
+    //전치행렬 바꾼 후 행렬
+    printf("전치행렬 바꾼 후 행렬\n");
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < m; j++)\
+            printf("%d\t", transpose[i][j]);
+        printf("\n");
+    }
+    return;
 }
 
-struct matA
-{
-	void Identity(int argc, char *argv[]) {
-		int i, j;
-		int n = 3;
-		int m[3][3];
-		for (i = 0; i < n; i++) {
-			for (j = 0; j < n; j++) {
-				if (i == j) m[i][j] = 1;
-				else m[i][j] = 0;
-			} 
-		}
-		for (i = 0; i < n; i++) {
-			for (j = 0; j < n; j++) {
-				printf("%2d", m[i][j]);
-			}
-			printf("\n");
-		}
-	}
-	void transposeNbyN(int matrix[][4], int n) {
-		int i, j, tmp;
 
-		for (i = 0; i < n; i++) {
-			// 전치를 한줄씩row 할 때마다 전치해야 할 줄과 컬럼이 하나씩  줄어듦. 
-			for (j = 0 + i; j < n; j++) {
-				tmp = matrix[i][j];
-				matrix[i][j] = matrix[j][i]; // 행과 열 인덱스를 바꾸어 저장.  
-				matrix[j][i] = tmp;
-			}
-		}
-	}
-};
+//----------------------------------------------------------- 멀티플라이 메트릭스
+
+
+void multiplyMatrix() {
+
+    // 배열 선언
+    int first[3][3];
+    int second[3][3];
+    int result[3][3];
+
+    // 첫 번째 행렬 입력 받기
+    cout << endl << "| 행렬 a 입력 |" << "\n\n";
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            cout << "Enter a" << i + 1 << " / b" << j + 1 << " :\t";
+            cin >> first[i][j];
+        }
+    }
+    // 두 번째 행렬 입력 받기
+    cout << endl << "| 행렬 b 입력 |" << "\n\n";
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            cout << "Enter b" << i + 1 << " / b" << j + 1 << " :\t ";
+            cin >> second[i][j];
+        }
+    }
+
+    // 입력한 행렬 출력하기
+    cout << "| 입력된 행렬값 |" << "\n\n";
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            cout << first[i][j] << " ";
+        }
+        cout << "\t";
+        for (int j = 0; j < 3; j++) {
+            cout << second[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    // 첫번째 행렬 x 두번째 행렬 계산
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            int sum = 0;
+            for (int k = 0; k < 3; ++k) {
+                sum += first[i][k] * second[k][j];
+            }
+            result[i][j] = sum;
+        }
+    }
+
+    // 행렬 곱 출력
+    cout << endl << "| 출력값 | " << "\n\n";
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            cout << " " << result[i][j];
+        }
+        cout << endl;
+    }
+}
+
+
+
+//--------------------------------------------------------- 멀티플라이트랜스포스 매트릭스
+
+
+void multiply(int arr1[][N], int arr2[][N], int arr3[][N]) { // 행렬 곱하는 함수 행성
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            arr3[i][j] = 0;
+            for (int k = 0; k < N; k++) {
+                arr3[i][j] += arr1[i][k] * arr2[k][j];
+            }
+        }
+    }
+}
+
+void multiplyTransposeMatrix() {
+    int arr1[N][N] = { // 기본 행렬 초기화
+       {1, 2, 3},
+       {4, 5, 6},
+       {7, 8, 9}
+    };
+
+    int arr2[N][N] = { // 전치 행렬 초기화
+       {1, 4, 7},
+       {2, 5, 8},
+       {3, 6, 9}
+    };
+
+    int arr3[N][N]; // 행렬의 곱을 저장할 배열 선언
+
+    multiply(arr1, arr2, arr3);
+
+    cout << "arr1 = " << endl;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            cout << +arr1[i][j] << " ";
+        }
+        cout << endl;
+    }
+    printf("\n");
+
+
+    cout << "arr2 = " << endl;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            cout << arr2[i][j] << " ";
+        }
+        cout << endl;
+    }
+    printf("\n");
+
+    cout << "arr1 * arr2 = " << endl;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            cout << arr3[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
